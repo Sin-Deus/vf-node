@@ -8,7 +8,7 @@ var player = require('./player');
 
 prompt.start();
 
-var promptSchema = [
+let promptSchema = [
     {
         'name': 'username',
         'required': true
@@ -36,7 +36,7 @@ prompt.get(promptSchema, function (err, promptResult) {
             return player(playerIds, promptResult.minValue);
         })
         .then(function (players) {
-            console.log(`${ players.length } player(s) found:`);
+            console.log(`\n${ players.length } player(s) found:`);
             _.each(players, player => console.log(`Player name: ${ player.name }, URL: ${ player.url }`));
         });
 });

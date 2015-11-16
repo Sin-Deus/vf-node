@@ -4,6 +4,7 @@ var q = require('q');
 var http = require('q-io/http');
 var cheerio = require('cheerio');
 var _ = require('lodash');
+var ProgressBar = require('progress');
 var cookie = require('./cookie');
 
 /**
@@ -61,8 +62,28 @@ function _getPlayerStatistics(html, playerId) {
  */
 function _getPlayersStatistics(playerIds) {
     let promises = [];
-    playerIds.forEach(playerId => promises.push(_getPlayerPage(playerId)));
-    return q.all(promises);
+    let timeoutPromises = [];
+
+    let progressBar = new ProgressBar('[:bar] :percent', {
+        'width': 30,
+        'total': playerIds.length
+    });
+
+    playerIds.forEach(function (playerId, i) {
+        let deferred = q.defer();
+
+        setTimeout(function () {
+            promises.push(_getPlayerPage(playerId));
+            progressBar.tick();
+            deferred.resolve();
+        }, i * 100);
+
+        timeoutPromises.push(deferred.promise);
+    });
+
+    return q.all(timeoutPromises).then(function () {
+        return q.all(promises);
+    });
 }
 
 /**
